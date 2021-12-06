@@ -112,9 +112,40 @@ void computeRating(std::vector<std::bitset< numBitsPerLine >> binaries, std::set
     }
 }
 
+    std::tuple<std::vector<std::bitset<numBitsPerLine>>, int> parseInput(const std::string fileName)
+    {
+
+        std::string stringvalue; 
+
+        std::string line;
+        std::ifstream filestream(fileName);
+        
+        int numLinesTextFile = 0;
+        std::bitset<numBitsPerLine> bs;
+        std::vector<std::bitset< numBitsPerLine >> binaries; // for binary data 
+
+        // Loop thorugh text file and save lines as a vector of bitsets
+        if (filestream.is_open()) 
+        {
+            while (std::getline(filestream, line)) 
+            {
+                std::istringstream linestream(line);
+                while (linestream >> stringvalue) 
+                {
+                    numLinesTextFile++;
+                    bs  = std::bitset<numBitsPerLine>(std::string(stringvalue));
+                    binaries.push_back(bs);
+                }
+            }
+        filestream.close();
+        } 
+        return std::make_tuple(binaries, numLinesTextFile);
+    }
+
 
 int main()
 {
+    
     std::string stringvalue; 
 
     std::string line;
@@ -139,6 +170,11 @@ int main()
         }
     filestream.close();
     } 
+    //TODO: parsing does not work
+    //std::vector<std::bitset< numBitsPerLine >> binaries; // for binary data 
+    //int numLinesTextFile = 0;
+    //std::tie(binaries, numLinesTextFile) = parseInput(fileName);
+
     std::bitset< numBitsPerLine> gammaRate; 
     std::bitset< numBitsPerLine> epsilonRate;
 
