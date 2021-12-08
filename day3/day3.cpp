@@ -8,7 +8,7 @@
 #include <tuple>
 #include <set>
 
-// TODO: Wie kann ich numBitsPerLine nicht hardcoden und trotzdem später als const verwenden? -> bitset möchte das im type haben
+// TODO: anderen Daten
 const std::string fileName{"day3_input.txt"}; 
 const std::size_t numBitsPerLine = 12; 
 
@@ -20,7 +20,7 @@ int mostCommonBit(std::vector<std::bitset<numBitsPerLine>> vectorOfBitsets, int 
     {
         bitSum +=  static_cast<int>((*it)[bitInd]); // NOTE: Index 0 of a Bitsets is the most right, or in other words the least significant bit
     } 
-    if(bitSum >= vectorOfBitsets.size()/2.0)
+    if(bitSum >= vectorOfBitsets.size()/2.0)// NOTE: Vermischung von int, double vermeiden -> einfach nur gucken welcher der Werte größer ist
     return 1; 
     else 
     return 0;
@@ -85,25 +85,29 @@ void eraseBinaryIndices(std::vector<std::bitset< numBitsPerLine >> &binaryVector
                 indicesToErase.insert(*it);
             }
         it++;
-        
     }
+    
     // erase indices using set difference TODO: better way? seems messy..
     std::set_difference(indices.begin(), indices.end(), indicesToErase.begin(), indicesToErase.end(),
     std::inserter(result, result.end()));
     indices = result;
 }
 
-void computeRating(std::vector<std::bitset< numBitsPerLine >> binaries, std::set<int> &indices, bool mostcommon)
+// Methoden sollten nur eine Sache machen, nicht mit dem bool steuern 
+// computeRating eine andere Methode f mitgeben, function pointers nachgucken
+void computeRating(std::vector<std::bitset< numBitsPerLine >> binaries, std::set<int> &indices, int(*test)(std::vector<std::bitset< numBitsPerLine >>, std::set<int>, int))
 {
     int mostOrLeastBit;
     int bitInd = numBitsPerLine - 1; 
     while(indices.size() > 1 )
     {
+        //test(3);
+        mostOrLeastBit = test(binaries, indices, bitInd);
         // find most commond bit at position bitInd 
-        if(mostcommon)
+        /*if(mostcommon)
         mostOrLeastBit = mostCommonBitBinaryIndices(binaries, indices, bitInd);  
         else
-        mostOrLeastBit = 1 - mostCommonBitBinaryIndices(binaries, indices, bitInd);  
+        mostOrLeastBit = 1 - mostCommonBitBinaryIndices(binaries, indices, bitInd); */  
 
         // Discard all binary indices that do not share most common bit at position bitInd
         eraseBinaryIndices(binaries, mostOrLeastBit, bitInd, indices); 
@@ -189,8 +193,8 @@ int main()
     for (int i=0; i<numLinesTextFile; i++) binindicesoxy.insert(i);
     std::set<int> binindicesoco2 = binindicesoxy;
 
-    computeRating(binaries, binindicesoxy, true); // True for most significant -> Oxygen Rating
-    computeRating(binaries, binindicesoco2, false); // False for least significant -> Co2 Rating
+    computeRating(binaries, binindicesoxy, &mostCommonBitBinaryIndices); // True for most significant -> Oxygen Rating
+    computeRating(binaries, binindicesoco2, [](auto x,auto y,auto z){return 1-mostCommonBitBinaryIndices(x,y,z);}); // False for least significant -> Co2 Rating
 
     std::cout << "oxygen rating  = "  << binaries[*binindicesoxy.cbegin()].to_ulong() << std::endl; 
     std::cout << "co 2 rating  = "  << binaries[*binindicesoco2.cbegin()].to_ulong() << std::endl; 
